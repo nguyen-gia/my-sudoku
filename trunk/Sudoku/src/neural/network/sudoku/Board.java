@@ -39,6 +39,7 @@ public class Board {
 	  In the otherwise, Qikj = 0.
     */
 	private boolean[][] fixed;
+	private int[][][] noise;
 			
 	public Board(){
 		window = new JFrame("Sudoku - Heuristic Computing");
@@ -304,6 +305,7 @@ public class Board {
 		//Check row
 		for(int i=1;i<=9;i++)
 			for(int k=1;k<=9;k++){
+				sum_row=0;
 				for(int j=1;j<=9;j++)
 					sum_row += Q[i][j][k];
 				if(sum_row != 1)
@@ -313,6 +315,7 @@ public class Board {
 		//check column;
 		for(int j=1;j<=9;j++)
 			for(int k=1;k<=9;k++){
+				sum_col=0;
 				for(int i=1;i<=9;i++)
 					sum_col += Q[i][j][k];
 				if(sum_col!=1)
@@ -323,6 +326,7 @@ public class Board {
 		for(int m=0;m<=2;m++)
 			for(int n=0;n<=2;n++)
 				for(int k=1;k<=9;k++){
+					sum_rgn=0;
 					for(int i=1;i<=3;i++)
 						for(int j=1;j<=3;j++)
 							sum_rgn += Q[3*m+i][3*n+i][k];
@@ -333,6 +337,7 @@ public class Board {
 		//check symbol
 		for(int i=1;i<=9;i++)
 			for(int j=1;j<=9;j++){
+				sum_sym=0;
 				for(int k=1;k<=9;k++)
 					sum_sym += Q[i][j][k];
 				if(sum_sym != 1) 
@@ -349,41 +354,55 @@ public class Board {
 	}
 	
 	private int conStrength(int i, int j, int k, int l, int m, int n){
-		if(k == n)
-			return -kronecker(i, l)-kronecker(j, m)-kronecker((i-1)/3, (l-1)/3)*kronecker((j-1)/3,(m-1)/3)-kronecker(k, n);
-		else 
-			return 0;
+		return -kronecker(i, l)-kronecker(j, m)-kronecker((i-1)/3, (l-1)/3)*kronecker((j-1)/3,(m-1)/3)-kronecker(k, n);
+		
+	}
+	private void generateRandomNoise(){
+		noise = new int[10][10][10];
+		Random randomGenerator = new Random();
+		for(int i=1;i<=9;i++)
+			for(int j=1;j<=9;j++)
+				for(int k=1;k<=9;k++){
+					noise[i][j][k] = -2 + randomGenerator.nextInt(5);
+					//System.out.println(noise[i][j][k]);
+				}
+					
 	}
 	private void process(){
-		int iteration = 500000;
+		int iteration = 100;
 		int a=1,q=2,I=4;
 		int stimulus;
-		while(iteration>0 && check()==false){
+		generateRandomNoise();
+		while(iteration>0 &&( check()==false)){
 			//System.out.println("Iteration "+iteration);
-//			for(int i=1;i<=9;i++)
-//				for(int j=1;j<=9;j++)
-				int i,j;
-				Random randomGenerator = new Random();
-				i=randomGenerator.nextInt(9)+1;
-				j=randomGenerator.nextInt(9)+1;
+			for(int i=1;i<=9;i++)
+				for(int j=1;j<=9;j++)
+//				int i,j;
+//				Random randomGenerator = new Random();
+//				i=randomGenerator.nextInt(9)+1;
+//				j=randomGenerator.nextInt(9)+1;
 				if(fixed[i][j]==false){
-						int k = randomGenerator.nextInt(9)+1;{
+//						int k = randomGenerator.nextInt(9)+1;{
 							//System.out.println(i+" "+j+" "+k);
+							for(int k=1;k<=9;k++){
 							stimulus = 0;
 							for(int l=1;l<=9;l++)
 								for(int m=1;m<=9;m++)
-									for(int n=1;n<=9;n++)
+									for(int n=1;n<=9;n++){
+									//if(i==1 && j==2 && Q[l][m][n]==1) System.out.println("l="+l+"m="+m+"n="+n+"conStreng="+conStrength(i,j,k,l,m,n));
 										//if(i!=l && j!=m && k!=n)
 										stimulus += conStrength(i, j, k, l, m, n)*a*Q[l][m][n];
-							stimulus += I; 												
-							if(stimulus >= 2 &&(Q[i][j][k]<q-1)){
+									}
+							stimulus +=I;
+							stimulus +=noise[i][j][k];
+							if(stimulus >2 &&(Q[i][j][k]<q-1)){
 								Q[i][j][k]++;
 								//break;
 							}
-							if(stimulus <= -2 &&(Q[i][j][k]>0)){
+							if(stimulus <-2 &&(Q[i][j][k]>0)){
 								Q[i][j][k]--;
 							}
-							//if(i==1 && j==3) System.out.println(i+" "+j+" "+k+" "+stimulus);
+							//if(i==1 && j==2) System.out.println(i+" "+j+" "+k+" "+stimulus);
 						}
 //					System.out.println(i+" "+j+" ");
 //					for(int tmp=1;tmp<=9;tmp++){
