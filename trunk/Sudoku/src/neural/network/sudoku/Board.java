@@ -59,8 +59,10 @@ public class Board {
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
 				for(int i=1;i<=9;i++)
-					for(int j=1;j<=9;j++)
+					for(int j=1;j<=9;j++){
 						input[i][j].setText(null);
+						input[i][j].setForeground(Color.black);
+					}
 			}
 		});
 		
@@ -194,12 +196,12 @@ public class Board {
 			    	    	fis = new FileInputStream(f);
 			    	    	dis = new DataInputStream(fis);
 			    	    	Q = new int[10][10][10];
-			    	    	fixed = new boolean[10][10];
+			    	    	//fixed = new boolean[10][10];
 			    	    	for(int i=1;i<=9;i++)
 								for(int j=1;j<=9;j++)
 									for(int k=1;k<=9;k++){
 										Q[i][j][k] = 0;
-										fixed[i][j] = false;
+										//fixed[i][j] = false;
 									}
 			    	    	for(int i=1;i<=9;i++)
 			    	    		for(int j=1;j<=9;j++)
@@ -207,7 +209,7 @@ public class Board {
 			    	    			try {
 			    	    				Q[i][j][k]= dis.readInt();
 			    	    				if(Q[i][j][k]==1){
-			    	    					fixed[i][j]=true;
+			    	    					//fixed[i][j]=true;
 			    	    					input[i][j].setText(Integer.toString(k));
 			    	    				}
 			    	    			} catch (IOException e1) {
@@ -308,8 +310,10 @@ public class Board {
 				sum_row=0;
 				for(int j=1;j<=9;j++)
 					sum_row += Q[i][j][k];
-				if(sum_row != 1)
+				if(sum_row != 1){
+					//System.out.println("Row + i = "+i+" k = "+k);
 					return false;
+				}
 			}
 		
 		//check column;
@@ -318,8 +322,10 @@ public class Board {
 				sum_col=0;
 				for(int i=1;i<=9;i++)
 					sum_col += Q[i][j][k];
-				if(sum_col!=1)
+				if(sum_col!=1){
+					//System.out.println("Column + j = "+j+" k = "+k);	
 					return false;
+				}
 			}
 		
 		//check region
@@ -329,9 +335,11 @@ public class Board {
 					sum_rgn=0;
 					for(int i=1;i<=3;i++)
 						for(int j=1;j<=3;j++)
-							sum_rgn += Q[3*m+i][3*n+i][k];
-					if(sum_rgn!=1)
+							sum_rgn += Q[3*m+i][3*n+j][k];
+					if(sum_rgn!=1){
+						//System.out.println("Region m = "+m+" n = "+n+" k = "+k);
 						return false;
+					}
 				}
 		
 		//check symbol
@@ -340,8 +348,10 @@ public class Board {
 				sum_sym=0;
 				for(int k=1;k<=9;k++)
 					sum_sym += Q[i][j][k];
-				if(sum_sym != 1) 
+				if(sum_sym != 1) {
+					//System.out.println("Symbol + i = "+i+" j = "+j);
 					return false;
+				}
 			}
 				
 		return true;
@@ -355,6 +365,7 @@ public class Board {
 	
 	private int conStrength(int i, int j, int k, int l, int m, int n){
 		return -kronecker(i, l)-kronecker(j, m)-kronecker((i-1)/3, (l-1)/3)*kronecker((j-1)/3,(m-1)/3)-kronecker(k, n);
+		
 	}
 	private void generateRandomNoise(){
 		noise = new int[10][10][10];
@@ -368,22 +379,26 @@ public class Board {
 					
 	}
 	private void process(){
-		int iteration = 100;
+		int iteration = 10000;
 		int a=1,q=2,I=4;
 		int stimulus;
 		generateRandomNoise();
-		while(iteration>0 &&( check()==false)){
-			//System.out.println("Iteration "+iteration);
-			for(int i=1;i<=9;i++)
-				for(int j=1;j<=9;j++)
-//				int i,j;
-//				Random randomGenerator = new Random();
-//				i=randomGenerator.nextInt(9)+1;
-//				j=randomGenerator.nextInt(9)+1;
-				if(fixed[i][j]==false){
-//						int k = randomGenerator.nextInt(9)+1;{
+		while((check()==false)){
+			System.out.println("Iteration "+iteration);
+			if(iteration==0) break;
+//			for(int i=1;i<=9;i++)
+//				for(int j=1;j<=9;j++)
+				int i,j;
+				Random randomGenerator = new Random();
+				do{
+					i=randomGenerator.nextInt(9)+1;
+					j=randomGenerator.nextInt(9)+1;
+				}
+				while(fixed[i][j]==true);
+//				if(fixed[i][j]==false){
+						int k = randomGenerator.nextInt(9)+1;{
 							//System.out.println(i+" "+j+" "+k);
-							for(int k=1;k<=9;k++){
+//							for(int k=1;k<=9;k++){
 							stimulus = 0;
 							for(int l=1;l<=9;l++)
 								for(int m=1;m<=9;m++)
@@ -393,6 +408,7 @@ public class Board {
 										stimulus += conStrength(i, j, k, l, m, n)*a*Q[l][m][n];
 									}
 							stimulus +=I;
+							noise[i][j][k] = -2 + randomGenerator.nextInt(5);
 							stimulus +=noise[i][j][k];
 							if(stimulus >2 &&(Q[i][j][k]<q-1)){
 								Q[i][j][k]++;
@@ -401,17 +417,18 @@ public class Board {
 							if(stimulus <-2 &&(Q[i][j][k]>0)){
 								Q[i][j][k]--;
 							}
-							//if(i==1 && j==2) System.out.println(i+" "+j+" "+k+" "+stimulus);
+							System.out.println(i+" "+j+" "+k+" "+stimulus);
 						}
 //					System.out.println(i+" "+j+" ");
 //					for(int tmp=1;tmp<=9;tmp++){
 //						if(Q[i][j][tmp]==1) System.out.print(tmp+ " ");
 //					}
 						
-					}
+					//}
 		iteration--;	
-		}	
+		}
+		//System.out.println(iteration);
 				
-	}
+ 	}
 
 }
