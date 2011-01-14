@@ -364,6 +364,11 @@ public class Board {
 	}
 	
 	private int conStrength(int i, int j, int k, int l, int m, int n){
+		if(k!=n) return 0;
+		else
+		if(i==l && j==m && k ==n)
+			return 0;
+		else
 		return -kronecker(i, l)-kronecker(j, m)-kronecker((i-1)/3, (l-1)/3)*kronecker((j-1)/3,(m-1)/3)-kronecker(k, n);
 		
 	}
@@ -382,49 +387,51 @@ public class Board {
 		int iteration = 10000;
 		int a=1,q=2,I=4;
 		int stimulus;
-		generateRandomNoise();
+		//generateRandomNoise();
 		while((check()==false)){
-			System.out.println("Iteration "+iteration);
+			//System.out.println("Iteration "+iteration);
 			if(iteration==0) break;
-//			for(int i=1;i<=9;i++)
-//				for(int j=1;j<=9;j++)
-				int i,j;
-				Random randomGenerator = new Random();
-				do{
-					i=randomGenerator.nextInt(9)+1;
-					j=randomGenerator.nextInt(9)+1;
-				}
-				while(fixed[i][j]==true);
-//				if(fixed[i][j]==false){
-						int k = randomGenerator.nextInt(9)+1;{
+			for(int i=1;i<=9;i++)
+				for(int j=1;j<=9;j++)
+//				int i,j;
+//				Random randomGenerator = new Random();
+//				do{
+//					i=randomGenerator.nextInt(9)+1;
+//					j=randomGenerator.nextInt(9)+1;
+//				}
+//				while(fixed[i][j]==true);
+				if(fixed[i][j]==false){
+//						int k = randomGenerator.nextInt(9)+1;{
 							//System.out.println(i+" "+j+" "+k);
-//							for(int k=1;k<=9;k++){
+							for(int k=1;k<=9;k++){
 							stimulus = 0;
 							for(int l=1;l<=9;l++)
 								for(int m=1;m<=9;m++)
 									for(int n=1;n<=9;n++){
-									//if(i==1 && j==2 && Q[l][m][n]==1) System.out.println("l="+l+"m="+m+"n="+n+"conStreng="+conStrength(i,j,k,l,m,n));
+									//if(i==1 && j==3 && Q[l][m][n]==1) System.out.println("l="+l+"m="+m+"n="+n+"conStreng="+conStrength(i,j,k,l,m,n));
 										//if(i!=l && j!=m && k!=n)
 										stimulus += conStrength(i, j, k, l, m, n)*a*Q[l][m][n];
 									}
 							stimulus +=I;
-							noise[i][j][k] = -2 + randomGenerator.nextInt(5);
-							stimulus +=noise[i][j][k];
-							if(stimulus >2 &&(Q[i][j][k]<q-1)){
+							//noise[i][j][k] = -2 + randomGenerator.nextInt(5);
+							//stimulus +=noise[i][j][k];
+							if(stimulus >= 0 &&(Q[i][j][k]<q-1)){
 								Q[i][j][k]++;
-								//break;
+								for(int tmp=1;tmp<=9;tmp++)
+									if(tmp!=k)
+										Q[i][j][tmp]=0;
 							}
-							if(stimulus <-2 &&(Q[i][j][k]>0)){
+							if(stimulus <0 &&(Q[i][j][k]>0)){
 								Q[i][j][k]--;
 							}
-							System.out.println(i+" "+j+" "+k+" "+stimulus);
+							//System.out.println(i+" "+j+" "+k+" "+stimulus);
 						}
 //					System.out.println(i+" "+j+" ");
 //					for(int tmp=1;tmp<=9;tmp++){
 //						if(Q[i][j][tmp]==1) System.out.print(tmp+ " ");
 //					}
 						
-					//}
+					}
 		iteration--;	
 		}
 		//System.out.println(iteration);
