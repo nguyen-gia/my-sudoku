@@ -355,7 +355,6 @@ public class Board {
 	
 	private int conStrength(int i, int j, int k, int l, int m, int n){
 		return -kronecker(i, l)-kronecker(j, m)-kronecker((i-1)/3, (l-1)/3)*kronecker((j-1)/3,(m-1)/3)-kronecker(k, n);
-		
 	}
 	private void generateRandomNoise(){
 		noise = new int[10][10][10];
