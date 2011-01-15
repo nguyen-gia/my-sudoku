@@ -33,7 +33,7 @@ public class Board {
 	private JMenuItem loadMenuItem;
 	private JTextField[][] input;
 	private int[][][] Q;
-	//private boolean[][][] clamp;
+	private boolean[][][] clamp;
 	/*Qijk is output of neural ijk.
 	  Qijk = 1 means if and only if the cell in ith row and jth column has the value of k 
 	  In the otherwise, Qikj = 0.
@@ -74,41 +74,20 @@ public class Board {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				// TODO Auto-generated method stub
-				Q = new int[10][10][10];
-				fixed = new boolean[10][10];
-				//clamp = new boolean[10][10][10];
-				for(int i=1;i<=9;i++)
-					for(int j=1;j<=9;j++)
-						for(int k=1;k<=9;k++){
-							Q[i][j][k] = 0;
-							fixed[i][j] = false;
-					//		clamp[i][j][k] = false;
-						}
-				for(int i=1;i<=9;i++)
-					for(int j=1;j<=9;j++)
-						if(input[i][j].getText()!=null){
-							int k;
-							try{
-							   k = Integer.parseInt(input[i][j].getText());
-							}catch(NumberFormatException e){
-							   k = 0;
-							}
-							if(k>=1 && k<= 9){
-								Q[i][j][k]=1;
-								fixed[i][j]=true;
-						//		setClamp(i,j,k,1);
-							}
-					}
+				init();
 				process();
 				for(int i=1;i<=9;i++)
-					for(int j=1;j<=9;j++)
+					for(int j=1;j<=9;j++){
+						String s="";
 						for(int k=1;k<=9;k++)
 							if(Q[i][j][k]==1){
 								if(fixed[i][j]==true){
 									input[i][j].setForeground(Color.blue);
 								}
-								input[i][j].setText(Integer.toString(k));
-								}
+							s=s+Integer.toString(k);
+							}
+							input[i][j].setText(s);
+						}
 				}
 		});
 		
@@ -196,20 +175,20 @@ public class Board {
 			    	    	fis = new FileInputStream(f);
 			    	    	dis = new DataInputStream(fis);
 			    	    	Q = new int[10][10][10];
-			    	    	//fixed = new boolean[10][10];
 			    	    	for(int i=1;i<=9;i++)
-								for(int j=1;j<=9;j++)
+								for(int j=1;j<=9;j++){
+									input[i][j].setText(null);
+									input[i][j].setForeground(Color.black);
 									for(int k=1;k<=9;k++){
-										Q[i][j][k] = 0;
-										//fixed[i][j] = false;
+										Q[i][j][k] = 0;										
 									}
+								}
 			    	    	for(int i=1;i<=9;i++)
 			    	    		for(int j=1;j<=9;j++)
 			    	    			for(int k=1;k<=9;k++)
 			    	    			try {
 			    	    				Q[i][j][k]= dis.readInt();
 			    	    				if(Q[i][j][k]==1){
-			    	    					//fixed[i][j]=true;
 			    	    					input[i][j].setText(Integer.toString(k));
 			    	    				}
 			    	    			} catch (IOException e1) {
@@ -238,67 +217,62 @@ public class Board {
 			}
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		window.pack();
-		window.setSize(480, 480);
+		window.setSize(600, 600);
 		window.setResizable(false);
 		window.setLocation(400, 60);
 		window.setVisible(true);	
 	}
-//	private void init()
-//	{
-//		Q = new int[10][10][10];
-//		fixed = new boolean[10][10];
-//		clamp = new boolean[10][10][10];
-//		for(int i=1;i<=9;i++)
-//			for(int j=1;j<=9;j++)
-//				for(int k=1;k<=9;k++){
-//					Q[i][j][k] = 0;
-//					fixed[i][j] = false;
-//					clamp[i][j][k] = false;
-//				}
-//		for(int i=1;i<=9;i++)
-//			for(int j=1;j<=9;j++)
-//				if(input[i][j].getText()!=null){
-//					int k;
-//					try{
-//					   k = Integer.parseInt(input[i][j].getText());
-//					}catch(NumberFormatException e){
-//					   k = 0;
-//					}
-//					if(k>=1 && k<= 9){
-//						fixed[i][j]=true;
-//						setClamp(i,j,k,1);
-//					}
-//			}
-//	}
-//	private void setClamp(int p, int q, int r, int value){
-//		Q[p][q][r]=value;
-//		clamp[p][q][r]=true;
-//		//Clamp column
-//		for(int i=1;i<=9;i++){			
-//				clamp[i][q][r]=true;
-//				}
-//		
-//		//Clamp row
-//		for(int j=1;j<=9;j++)
-//			for(int k=1;k<=9;k++){
-//				clamp[p][j][k]=true;
-//			}
-//		
-//		//Clamp region
-//		for(int m=(i-1)/3;m<=2;m++)
-//			for(int n=0;n<=2;n++)
-//				for(int k=1;k<=9;k++){
-//					for(int i=1;i<=3;i++)
-//						for(int j=1;j<=3;j++)
-//							clamp[3*m+i][3*n+i][k]=true;
-//			}
-//		
-//		//Clamp symbol
-//		for(int i=1;i<=9;i++)
-//			for(int j=1;j<=9;j++){
-//				clamp[i][j][r]=true;
-//			}
-//	}
+	private void init()
+	{
+		Q = new int[10][10][10];
+		fixed = new boolean[10][10];
+		clamp = new boolean[10][10][10];
+		for(int i=1;i<=9;i++)
+			for(int j=1;j<=9;j++)
+				for(int k=1;k<=9;k++){
+					Q[i][j][k] = 0;
+					fixed[i][j] = false;
+					clamp[i][j][k] = false;
+				}
+		for(int i=1;i<=9;i++)
+			for(int j=1;j<=9;j++)
+				if(input[i][j].getText()!=null){
+					int k;
+					try{
+					   k = Integer.parseInt(input[i][j].getText());
+					}catch(NumberFormatException e){
+					   k = 0;
+					}
+					if(k>=1 && k<= 9){
+						Q[i][j][k]=1;
+						fixed[i][j]=true;
+						setClamp(i,j,k);
+					}
+			}
+	}
+	private void setClamp(int p, int q, int r){
+		clamp[p][q][r]=true;
+		//Clamp column
+		for(int i=1;i<=9;i++){			
+				clamp[i][q][r]=true;
+				}
+		
+		//Clamp row
+		for(int j=1;j<=9;j++){
+				clamp[p][j][r]=true;
+			}
+		
+		//Clamp region
+		for(int i=1;i<=3;i++)
+			for(int j=1;j<=3;j++){
+				clamp[(p-1)/3*3+i][(q-1)/3*3+j][r]=true;
+			}
+		
+		//Clamp symbol
+		for(int i=1;i<=9;i++){
+				clamp[p][q][i]=true;
+			}
+	}
 	private boolean check(){
 		int sum_row =0;
 		int sum_col =0;
@@ -364,12 +338,13 @@ public class Board {
 	}
 	
 	private int conStrength(int i, int j, int k, int l, int m, int n){
-		if(k!=n) return 0;
-		else
-		if(i==l && j==m && k ==n)
+		if(k!=n &&((i!=l)||(j!=m)))
 			return 0;
-		else
-		return -kronecker(i, l)-kronecker(j, m)-kronecker((i-1)/3, (l-1)/3)*kronecker((j-1)/3,(m-1)/3)-kronecker(k, n);
+		if(k!=n && (i==l)&&(j==m))
+			return -1;
+		if(k==n && i==l && j==m) return -4;
+		
+		return -kronecker(i, l)-kronecker(j, m)-kronecker((i-1)/3, (l-1)/3)*kronecker((j-1)/3,(m-1)/3);//-kronecker(k, n);
 		
 	}
 	private void generateRandomNoise(){
@@ -383,59 +358,49 @@ public class Board {
 				}
 					
 	}
+	private void printClamp(){
+		for(int i= 1;i<=9;i++)
+			for(int j=1;j<=9;j++){
+				System.out.print("i = "+i+" j = "+j);
+				for(int k=1;k<=9;k++)
+					if(clamp[i][j][k]==true)
+						System.out.print(" "+k);
+				System.out.println(" ");
+			}
+	}
 	private void process(){
-		int iteration = 10000;
+		int iteration = 1;
 		int a=1,q=2,I=4;
 		int stimulus;
-		//generateRandomNoise();
-		while((check()==false)){
-			//System.out.println("Iteration "+iteration);
-			if(iteration==0) break;
+		boolean end=false;
+		while((end==false)&&(check()==false)){
+			System.out.println("Iteration "+iteration);
+			end=true;
 			for(int i=1;i<=9;i++)
 				for(int j=1;j<=9;j++)
-//				int i,j;
-//				Random randomGenerator = new Random();
-//				do{
-//					i=randomGenerator.nextInt(9)+1;
-//					j=randomGenerator.nextInt(9)+1;
-//				}
-//				while(fixed[i][j]==true);
-				if(fixed[i][j]==false){
-//						int k = randomGenerator.nextInt(9)+1;{
-							//System.out.println(i+" "+j+" "+k);
-							for(int k=1;k<=9;k++){
-							stimulus = 0;
+					for(int k=1;k<=9;k++){
+						if(clamp[i][j][k]==false){
+							stimulus = 0;	
 							for(int l=1;l<=9;l++)
 								for(int m=1;m<=9;m++)
 									for(int n=1;n<=9;n++){
-									//if(i==1 && j==3 && Q[l][m][n]==1) System.out.println("l="+l+"m="+m+"n="+n+"conStreng="+conStrength(i,j,k,l,m,n));
-										//if(i!=l && j!=m && k!=n)
 										stimulus += conStrength(i, j, k, l, m, n)*a*Q[l][m][n];
-									}
+										}
 							stimulus +=I;
-							//noise[i][j][k] = -2 + randomGenerator.nextInt(5);
-							//stimulus +=noise[i][j][k];
-							if(stimulus >= 0 &&(Q[i][j][k]<q-1)){
+							if(stimulus >2 &&(Q[i][j][k]<q-1)){
 								Q[i][j][k]++;
-								for(int tmp=1;tmp<=9;tmp++)
-									if(tmp!=k)
-										Q[i][j][tmp]=0;
+								end=false;
 							}
 							if(stimulus <0 &&(Q[i][j][k]>0)){
 								Q[i][j][k]--;
+								end=false;
 							}
-							//System.out.println(i+" "+j+" "+k+" "+stimulus);
-						}
-//					System.out.println(i+" "+j+" ");
-//					for(int tmp=1;tmp<=9;tmp++){
-//						if(Q[i][j][tmp]==1) System.out.print(tmp+ " ");
-//					}
-						
+						}				
 					}
-		iteration--;	
+			iteration++;	
 		}
-		//System.out.println(iteration);
-				
+		if(check()==true)System.out.println("Solution was found");
+		System.out.println(iteration);			
  	}
 
 }
