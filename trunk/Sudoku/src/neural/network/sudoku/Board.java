@@ -374,7 +374,7 @@ public class Board {
 		int stimulus;
 		boolean end=false;
 		while((end==false)&&(check()==false)){
-			if(iteration==12) break;
+			//f(iteration==12) break;
 			System.out.println("Iteration "+iteration);
 			end=true;
 			for(int i=1;i<=9;i++)
@@ -388,15 +388,15 @@ public class Board {
 										stimulus += conStrength(i, j, k, l, m, n)*a*Q[l][m][n];
 										}
 							stimulus +=I;
-							if(stimulus >2 &&(Q[i][j][k]<q-1)){
+							if(stimulus >1 &&(Q[i][j][k]<q-1)){
 								Q[i][j][k]++;
 								end=false;
-								System.out.println(i+" "+j+" "+k+" "+"tang");
+								//System.out.println(i+" "+j+" "+k+" "+"tang");
 							}
 							if(stimulus <0 &&(Q[i][j][k]>0)){
 								Q[i][j][k]--;
 								end=false;
-								System.out.println(i+" "+j+" "+k+" "+"giam");
+								//System.out.println(i+" "+j+" "+k+" "+"giam");
 							}
 							//System.out.println(i+" "+j+" "+k+" "+stimulus);
 						}				
