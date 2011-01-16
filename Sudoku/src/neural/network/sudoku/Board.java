@@ -15,6 +15,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Random;
 
+import javax.swing.BorderFactory;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -39,7 +40,6 @@ public class Board {
 	  In the otherwise, Qikj = 0.
     */
 	private boolean[][] fixed;
-	private int[][][] noise;
 			
 	public Board(){
 		window = new JFrame("Sudoku - Heuristic Computing");
@@ -81,9 +81,11 @@ public class Board {
 						String s="";
 						for(int k=1;k<=9;k++)
 							if(Q[i][j][k]==1){
-								if(fixed[i][j]==true){
+								if(fixed[i][j]!=true){
 									input[i][j].setForeground(Color.blue);
 								}
+								else
+									input[i][j].setForeground(Color.red);
 							s=s+Integer.toString(k);
 							}
 							input[i][j].setText(s);
@@ -108,7 +110,7 @@ public class Board {
 				    int returnVal = chooser.showSaveDialog(null);
 				    if(returnVal == JFileChooser.APPROVE_OPTION) {
 				            path = chooser.getSelectedFile().getPath();
-				            System.out.println(path);
+				            //System.out.println(path);
 				    	    File f = new File(path);
 				    	    try {
 				    	    	fos = new FileOutputStream(f);
@@ -169,7 +171,7 @@ public class Board {
 			    int returnVal = chooser.showOpenDialog(null);
 			    if(returnVal == JFileChooser.APPROVE_OPTION) {
 			            path = chooser.getSelectedFile().getPath();
-			            System.out.println(path);
+			            //System.out.println(path);
 			    	    File f = new File(path);
 			    	    try {
 			    	    	fis = new FileInputStream(f);
@@ -213,6 +215,23 @@ public class Board {
 				input[i][j] = new JTextField(1);
 				Font newFont=new Font(input[i][j].getFont().getName(),Font.BOLD,20);
 				input[i][j].setFont(newFont);
+				if(i%3==0 && j%3!=0 && i<9)
+					input[i][j].setBorder(BorderFactory.createMatteBorder(1, 1, 5, 1, Color.BLACK));
+				else if(i%3 !=0 && j%3==0 && j<9)
+					input[i][j].setBorder(BorderFactory.createMatteBorder(1, 1, 1, 5, Color.BLACK));
+				else if(i%3==0 && j%3==0)
+					if(i<9)
+						if(j<9)
+							input[i][j].setBorder(BorderFactory.createMatteBorder(1, 1, 5, 5, Color.BLACK));
+						else
+							input[i][j].setBorder(BorderFactory.createMatteBorder(1, 1, 5, 1, Color.BLACK));
+					else
+						if(j<9)
+							input[i][j].setBorder(BorderFactory.createMatteBorder(1, 1, 1, 5, Color.BLACK));
+						else
+							input[i][j].setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, Color.BLACK));
+				else
+					input[i][j].setBorder(BorderFactory.createMatteBorder(1, 1, 1, 1, Color.BLACK));
 				mainPanel.add(input[i][j]);
 			}
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -323,84 +342,99 @@ public class Board {
 				for(int k=1;k<=9;k++)
 					sum_sym += Q[i][j][k];
 				if(sum_sym != 1) {
-					//System.out.println("Symbol + i = "+i+" j = "+j);
 					return false;
 				}
 			}
 				
 		return true;
 	}
-	private int kronecker(int i,int j){
-		if(i==j)
-			return 1;
-		else
-			return 0;
-	}
-	
-	private int conStrength(int i, int j, int k, int l, int m, int n){
-		if(k!=n &&((i!=l)||(j!=m)))
-			return 0;
-		if(k!=n && (i==l)&&(j==m))
-			return -1;
-		if(k==n && i==l && j==m) return -4;
-		
-		return -kronecker(i, l)-kronecker(j, m)-kronecker((i-1)/3, (l-1)/3)*kronecker((j-1)/3,(m-1)/3);//-kronecker(k, n);
-		
-	}
-	private void generateRandomNoise(){
-		noise = new int[10][10][10];
+//	private int kronecker(int i,int j){
+//		if(i==j)
+//			return 1;
+//		else
+//			return 0;
+//	}
+//	
+//	private int conStrength(int i, int j, int k, int l, int m, int n){
+//		if(k!=n &&((i!=l)||(j!=m)))
+//			return 0;
+//		if(k!=n && (i==l)&&(j==m))
+//			return -1;
+//		if(k==n && i==l && j==m) return -4;
+//		
+//		return -kronecker(i, l)-kronecker(j, m)-kronecker((i-1)/3, (l-1)/3)*kronecker((j-1)/3,(m-1)/3);//-kronecker(k, n);
+//		
+//	}
+//	private void generateRandomNoise(){
+//		noise = new int[10][10][10];
+//		Random randomGenerator = new Random();
+//		for(int i=1;i<=9;i++)
+//			for(int j=1;j<=9;j++)
+//				for(int k=1;k<=9;k++){
+//					noise[i][j][k] = -2 + randomGenerator.nextInt(5);
+//					//System.out.println(noise[i][j][k]);
+//				}
+//					
+//	}
+//	private void printClamp(){
+//		for(int i= 1;i<=9;i++)
+//			for(int j=1;j<=9;j++){
+//				System.out.print("i = "+i+" j = "+j);
+//				for(int k=1;k<=9;k++)
+//					if(clamp[i][j][k]==true)
+//						System.out.print(" "+k);
+//				System.out.println(" ");
+//			}
+//	}
+	int checkEnergy(int p, int q, int r,int value){
+		int E=0;
+		int sum_row =0;
+		int sum_col =0;
+		int sum_rgn =0;
+		int sum_sym =0;
+		Q[p][q][r]=value;
 		Random randomGenerator = new Random();
-		for(int i=1;i<=9;i++)
-			for(int j=1;j<=9;j++)
-				for(int k=1;k<=9;k++){
-					noise[i][j][k] = -2 + randomGenerator.nextInt(5);
-					//System.out.println(noise[i][j][k]);
+		//column
+		for(int i=1;i<=9;i++){			
+				sum_row+=Q[i][q][r];
 				}
-					
-	}
-	private void printClamp(){
-		for(int i= 1;i<=9;i++)
-			for(int j=1;j<=9;j++){
-				System.out.print("i = "+i+" j = "+j);
-				for(int k=1;k<=9;k++)
-					if(clamp[i][j][k]==true)
-						System.out.print(" "+k);
-				System.out.println(" ");
+		E+=(sum_row-1)*(sum_row-1);
+		
+		//row
+		for(int j=1;j<=9;j++){
+				sum_col+=Q[p][j][r];
 			}
+		E+=(sum_col-1)*(sum_col-1);
+		//region
+		for(int i=1;i<=3;i++)
+			for(int j=1;j<=3;j++){
+				sum_rgn+=Q[(p-1)/3*3+i][(q-1)/3*3+j][r];
+			}
+		E+=(sum_rgn-1)*(sum_rgn-1);
+		//symbol
+		for(int i=1;i<=9;i++){
+				sum_sym+=Q[p][q][i];
+			}
+		E+=(sum_sym-1)*(sum_sym-1);
+		if(sum_sym>0) E+=-sum_sym+randomGenerator.nextInt(2*sum_sym+1);
+		return E;
 	}
 	private void process(){
-		int iteration = 1;
-		int a=1,q=2,I=4;
-		int stimulus;
-		boolean end=false;
-		while((end==false)&&(check()==false)){
-			//f(iteration==12) break;
-			System.out.println("Iteration "+iteration);
-			end=true;
-			for(int i=1;i<=9;i++)
-				for(int j=1;j<=9;j++)
-					for(int k=1;k<=9;k++){
-						if(clamp[i][j][k]==false){
-							stimulus = 0;	
-							for(int l=1;l<=9;l++)
-								for(int m=1;m<=9;m++)
-									for(int n=1;n<=9;n++){
-										stimulus += conStrength(i, j, k, l, m, n)*a*Q[l][m][n];
-										}
-							stimulus +=I;
-							if(stimulus >1 &&(Q[i][j][k]<q-1)){
-								Q[i][j][k]++;
-								end=false;
-								//System.out.println(i+" "+j+" "+k+" "+"tang");
-							}
-							if(stimulus <0 &&(Q[i][j][k]>0)){
-								Q[i][j][k]--;
-								end=false;
-								//System.out.println(i+" "+j+" "+k+" "+"giam");
-							}
-							//System.out.println(i+" "+j+" "+k+" "+stimulus);
-						}				
-					}
+		int iteration = 0;
+		while((check()==false)){
+			//System.out.println("Iteration "+iteration);
+				for(int i=1;i<=9;i++)
+					for(int j=1;j<=9;j++)
+						for(int k=1;k<=9;k++){
+							if(clamp[i][j][k]==false){
+								if(checkEnergy(i,j,k,1)<checkEnergy(i,j,k,0)){
+									Q[i][j][k]=1;
+								}else{
+									Q[i][j][k]=0;
+								}
+								
+							}		
+			}	
 			iteration++;	
 		}
 		if(check()==true)System.out.println("Solution was found");
